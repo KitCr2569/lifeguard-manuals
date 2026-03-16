@@ -1,1 +1,2465 @@
-<h1>LIFE+GUARD Online Manual Search</h1><p>Deploying...</p>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFE+GUARD Online Manual Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: bgPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .logo span {
+            color: #3b82f6;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Update Status Bar */
+        .update-status {
+            max-width: 700px;
+            margin: 10px auto 0;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.loading {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+
+        .status-badge.live {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .status-badge.offline {
+            background: rgba(107, 114, 128, 0.1);
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            color: #9ca3af;
+        }
+
+        .status-badge.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-badge.loading .status-dot {
+            background: #fbbf24;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .status-badge.live .status-dot { background: #10b981; }
+        .status-badge.offline .status-dot { background: #9ca3af; }
+        .status-badge.error .status-dot { background: #ef4444; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca3af;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .refresh-btn .spin {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .new-count {
+            font-size: 11px;
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        /* New Items Panel */
+        .new-items-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .new-items-badge:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .new-items-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+            padding: 20px;
+        }
+
+        .new-items-modal {
+            background: #141420;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .new-items-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .new-items-modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .new-items-modal-header h3 .count-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .new-items-modal-close {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca3af;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .new-items-modal-close:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .new-items-modal-body {
+            overflow-y: auto;
+            padding: 8px 16px 16px;
+        }
+
+        .new-item-entry {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .new-item-entry:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(59, 130, 246, 0.15);
+        }
+
+        .new-item-num {
+            font-size: 11px;
+            color: #4b5563;
+            min-width: 24px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .new-item-info {
+            flex: 1;
+        }
+
+        .new-item-brand {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 2px;
+        }
+
+        .new-item-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #e5e7eb;
+        }
+
+        .new-item-type {
+            font-size: 10px;
+            color: #4b5563;
+            margin-top: 2px;
+        }
+
+        .new-item-link {
+            color: #3b82f6;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .new-item-entry:hover .new-item-link {
+            opacity: 1;
+        }
+
+        /* Search Container */
+        .search-container {
+            max-width: 700px;
+            margin: 30px auto 20px;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper:focus-within {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .search-wrapper:focus-within .search-icon {
+            color: #3b82f6;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 18px 50px 18px 55px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        #searchInput::placeholder {
+            color: #4b5563;
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            transition: all 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        /* Filters */
+        .filters {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+        }
+
+        .filter-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Stats */
+        .stats {
+            text-align: center;
+            padding: 10px 20px;
+            color: #6b7280;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .stats span {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Results Grid */
+        .results {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .result-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-brand {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #8b5cf6;
+            margin-bottom: 6px;
+        }
+
+        .card-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e5e7eb;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .card-type {
+            font-size: 11px;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-type .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #3b82f6;
+        }
+
+        .open-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #374151;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover .open-icon {
+            color: #3b82f6;
+            transform: translateY(-50%) translateX(3px);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            color: #4b5563;
+            font-size: 15px;
+        }
+
+        /* Loading animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .results { grid-template-columns: 1fr; }
+            .logo { font-size: 22px; }
+            .header { padding: 24px 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">LIFE<span>+</span>GUARD</div>
+        <div class="subtitle">Online Manual Search — <span id="totalCount">1,337</span> คู่มือ</div>
+        <div class="update-status" id="updateStatus">
+            <span class="status-badge loading" id="statusBadge">
+                <span class="status-dot"></span>
+                <span id="statusText">กำลังตรวจสอบข้อมูลใหม่...</span>
+            </span>
+            <button class="refresh-btn" id="refreshBtn" onclick="fetchSitemapData()" disabled>
+                <span id="refreshIcon">🔄</span> อัพเดท
+            </button>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="ค้นหาคู่มือ... (เช่น Canon RF 35, Sony A7, Nikon Z8)" autofocus>
+            <button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕ ล้าง</button>
+        </div>
+    </div>
+
+    <div class="filters" id="filters"></div>
+    <div class="stats" id="stats"></div>
+    <div class="results" id="results"></div>
+
+    <script>
+    // === DATA: All 1,337 online manual slugs ===
+    const BASE_URL = 'https://www.lifeguard-design.com/pages/onlinemanual-';
+
+    // Load data from the embedded list
+    const manualSlugs = [
+    "7artisansaf50f18-0845",
+    "a7riv-0925",
+    "airpods-1031",
+    "airpods4-0326",
+    "airpodsmax",
+    "apple140wusbc-21121729",
+    "apple20wusbc-2103301458",
+    "apple35wusbc-0856",
+    "apple35wusbc-1546",
+    "apple67wusbc-0253",
+    "apple70wusbc-0253-1",
+    "applemagicmouse2-2010081139",
+    "applemagictrackpad2-2010081135",
+    "applemagictrackpad3-0921",
+    "applepencil-0854",
+    "canon90d-0354",
+    "canonbge22-0501",
+    "canonbgr10-1014",
+    "canonbgr10-2106161154",
+    "canonbgr20-0253",
+    "canoncfr20-0426",
+    "canon-ef-100400f4556lisiiusm",
+    "canonef100400f4556lisiiusm-0843",
+    "canonef100f28lmacroisusm-0900",
+    "canonef100f28lmacroisusm-2008181006",
+    "canonef1124f4lusm-1635",
+    "canonef1124f4lusm-2201021010",
+    "canonef135f2lusm-0901",
+    "canonef135f2lusm-2008121148",
+    "canon-ef1635f28lii",
+    "canon-ef-1635f28liiiusm",
+    "canonef1635f28liiiusm-1637",
+    "canonef1635f28liiiusm-1638",
+    "canonef1635f4lisus-1333",
+    "canonef1740f4lusm-0935",
+    "canonef200f18lusm-0902",
+    "canonef200f18lusm-2009211128",
+    "canonef200f2lisusm-1633",
+    "canonef24105f28lisiiusmz-1115",
+    "canonef24105f4lisiiusm-0931",
+    "canonef24105f4lisiiusm-2011101157",
+    "canonef24105mmf4lisiiusm-1650",
+    "canonef24105mmf4lisusm-0326",
+    "canon-ef2470f28lii",
+    "canonef2470f28liiusm-1639",
+    "canonef24-70f28lusm-0819",
+    "canonef35f14liiusm-0850",
+    "canonef35f14liiusm-2109061147",
+    "canonef35f14lusm-0848",
+    "canonef35f14lusm-2008121149",
+    "canonef400f56lusm-1045",
+    "canonef40f28stm-1157",
+    "canonef50f12lusm0852",
+    "canon-ef50f12usm",
+    "canonef50f18ii-0907",
+    "canonef50f18stm-0856",
+    "canon-ef-70200f28lisiiiusm",
+    "canonef70200f28lisiiusm-0838",
+    "canonef70200f28lisusm-21120944",
+    "canonef70200f28lusm-0836",
+    "canonef70200f28lusm-1709",
+    "canonef70200f28lusmnois-1400",
+    "canon-ef70200f4lii",
+    "canonef70200f4lisiiusm-1500",
+    "canon-ef70200f4lisusm",
+    "canonef70200f4lisusm-1456",
+    "canonef70200f4lusm-1521",
+    "canonef70200f4lusm-2203021632",
+    "canonef70300f456isiiusm-0841",
+    "canonef70300f456isiiusm-2012181526",
+    "canonef70300f456lisusm-0839",
+    "canonef70300f456lisusm-2203041513",
+    "canon-ef800f56-0901",
+    "canonef815f4lfisheyeusm-1620",
+    "canonef815f4lfisheyeusm-2008071544",
+    "canonef85f12liiusm-0858",
+    "canonef85f12liiusm-2008041138",
+    "canonef85f12lusm-0947",
+    "canonef85f14lisusm-0859",
+    "canonef85f14lisusm-2201051202",
+    "canon-efeosmmountadapter-0218",
+    "canonefeosrcontrolring-0921",
+    "canonefeosrcontrolring-2103221135",
+    "canon-ef-eosrmountadapter",
+    "canonefeosrmountadapter-0920",
+    "canonefm1545f3563isstm-1056",
+    "canonefm55200f4563-0203",
+    "canoneos5div-1636",
+    "canoneos6dii-1452",
+    "canoneosm50-1006",
+    "canoneosm6",
+    "canoneosm6ii-0225",
+    "canon-eosr",
+    "canoneosr-1008",
+    "canon-eosr1-0505",
+    "canoneosr3-1009",
+    "canoneosr3-1146",
+    "canoneosr50-1504",
+    "canon-eosr50v",
+    "canoneosr5-1012",
+    "canoneosr5-2008210310",
+    "canoneosr5c-1659",
+    "canoneosr5ii-0211",
+    "canoneosr6-1013",
+    "canoneosr6ii-1623",
+    "canoneosr6iii-0841",
+    "canoneosr7-1026",
+    "canoneosr8-1308",
+    "canon-eosrp",
+    "canoneosrp-1007",
+    "canonextenderef14xiii-1023",
+    "canonextenderef2xiii-0922",
+    "canonextenderef2xiii-2201060920",
+    "canonextenderrf14x-1000",
+    "canonextenderrf14x-2110101243",
+    "canonextenderrf2x-1000",
+    "canonextenderrf2x-2111121643",
+    "canon-g7xiii-0156",
+    "canonhg100tbr",
+    "canon-m50",
+    "canonpowershotv1-0329",
+    "canonpze2-1030",
+    "canonr10-1406",
+    "canon-rf100300f28lisusm-0934",
+    "canonrf100400f568isusm-0942",
+    "canonrf100400f568isusm-2111091351",
+    "canonrf100500f4571lisusm-0943",
+    "canonrf100500f4571lisusm-2010150843",
+    "canonrf100f28lmacroisusm",
+    "canonrf100f28lmacroisusm-1439",
+    "canon-rf1020f4lisstm-0140",
+    "canonrf135f18-lisusm-1712",
+    "canonrf1435f4lisusm-0923",
+    "canonrf1435f4lisusm-2110261418",
+    "canonrf1530f4563isstm-1340",
+    "canon-rf-1535f28lisusm",
+    "canonrf1535f28lisusm-0926",
+    "canon-rf1628f28-0347",
+    "canonrf16-50f28stm-0948",
+    "canonrf200800f639-0455",
+    "canonrf20f14lvcm-0855",
+    "canon-rf24105f40l",
+    "canonrf24105f471isstm-1620",
+    "canon-rf-24240f463isusm",
+    "canonrf24240f463isusm-0933",
+    "canonrf2450f4563isstm-1426",
+    "canon-rf-2470f28lisusm",
+    "canonrf2470f28lisusm-0930",
+    "canon-rf24f14l-0237",
+    "canonrf24f18macroisstm-0857",
+    "canon-rf2870f20l",
+    "canonrf2870f28is-0343",
+    "canonrf2870f2lusm-0936",
+    "canonrf28f28stm-0945",
+    "canonrf35f14l-1147",
+    "canon-rf35f18macro",
+    "canonrf35f18macroisstm-0951",
+    "canonrf400f28lisusm-1155",
+    "canon-rf45f12-946",
+    "canon-rf50f12l",
+    "canonrf50f12lusm-0952",
+    "canon-rf50f14l-0429",
+    "canonrf50f18stm-222150941",
+    "canonrf52f28ldualfisheye-0507",
+    "canonrf600f11isstm-1104",
+    "canonrf600f4lisusm-1458",
+    "canon-rf-70200f28lisusm",
+    "canonrf70200f28lisusm-0937",
+    "canon-rf70200f28z-0137",
+    "canonrf70200f4lisusm-0840",
+    "canonrf70200f4lisusm-2103301005",
+    "canon-rf75300f456-0903",
+    "canonrf800f11isstm-0956",
+    "canonrf800f11isstm-210191049",
+    "canonrf800f56lisusm-0922",
+    "canonrf85f12lusmds-0955",
+    "canonrf85f12lusmrf85f12lusmds-2007230221",
+    "canonrf85f14l-0350",
+    "canonrf85f2macroisstm-0953",
+    "canonrf85f2macroisstm-2111190855",
+    "canonrfs1018f4563isstm-0315",
+    "canonrfs1430f463pz-0902",
+    "canonrfs18150f3563isstm-1623",
+    "canonrfs1845f4563isstm-1121",
+    "canonrfs55210f571isstm-1129",
+    "canonspeedlite470exai-0943",
+    "canonspeedlite600exiirt-1015",
+    "canonspeedlite600exiirt-2109271453",
+    "canonspeedliteel100-0339",
+    "canonspeedliteel5-0510",
+    "canontse24f35lii-0126",
+    "canontse50f28lmacro-0911",
+    "canontse50f28lmacro211131022",
+    "cardopacktalkoutdoor-1133",
+    "dji360-1700",
+    "djiaction4-1042",
+    "djiaction5pro-0905",
+    "djiaction6-0246",
+    "djiavata2-0309",
+    "djiavata2-0505",
+    "djigoggles3-0505",
+    "djimic-1034",
+    "djimic-1402",
+    "djimic2-0516",
+    "djimic3-0915",
+    "djimicmini-1646",
+    "djinano-1715",
+    "djipocket3-0530",
+    "djircmotion3-0507",
+    "fijifilm-xt2",
+    "fijifilm-xt3",
+    "fringerc645gfxii-0845",
+    "fringerefe-1028",
+    "fujifilmefx8-1437",
+    "fujifilmfan001-0912",
+    "fujifilmgf100200f56rlmoiswr-1401",
+    "fujifilmgf100200f56rlmoiswr-2110141003",
+    "fujifilmgf110f2rlmwr-1413",
+    "fujifilmgf110f2rlmwr-2107261123",
+    "fujifilmgf120f4rlmoiswrmacro-2108051049",
+    "fujifilmgf120mmf4rlmoiswrmacro-1414",
+    "fujifilmgf14xtc-0449",
+    "fujifilmgf2035f4rwr-1043",
+    "fujifilmgf23f4rlmwr-1402",
+    "fujifilmgf23f4rlmwr-2107090942",
+    "fujifilm-gf250f4rlmoiswr",
+    "fujifilmgf250f4rlmoiswr-1418",
+    "fujifilmgf30f35rwr-1403",
+    "fujifilmgf30f35rwr-211211615",
+    "fujifilmgf3264f4rlmwr-1353",
+    "fujifilmgf3264f4rlmwr-2106090911",
+    "fujifilmgf3570f4556wr-1354",
+    "fujifilmgf3570f4556wr-2111101337",
+    "fujifilmgf45100f4rlmoiswr-1357",
+    "fujifilmgf45100mmf4rlmoiswr-2110051713",
+    "fujifilmgf45f28rwr-1404",
+    "fujifilmgf45f28rwr-2107261118",
+    "fujifilmgf500wr-0203",
+    "fujifilmgf50f35rlmwr-1405",
+    "fujifilmgf50f35rlmwr-2105251727",
+    "fujifilmgf55f17rwr-0152",
+    "fujifilmgf63f28rwr-1411",
+    "fujifilmgf63f28rwr-2107231323",
+    "fujifilmgf80f17rwr-1412",
+    "fujifilmgf80f17rwr-2107090930",
+    "fujifilmgfx100-1130",
+    "fujifilmgfx100-2101261718",
+    "fujifilmgfx100ii-0103",
+    "fujifilmgfx100rf-0234",
+    "https://www.lifeguard-design.com/pages/onlinemanualfujifilmgfx100s-2105251019",
+    "fujifilmgfx100sgfx100siigfx50sii-1128",
+    "fujifilmgfx50r-1144",
+    "fujifilmgfx50s-1559",
+    "fujifilm-instaxminievocinema-0336",
+    "fujifilminstaxminievo-0949",
+    "fujifilminstaxwideevo-0449",
+    "fujifilmtclx100ii",
+    "fujifilmtclx100ii-1419",
+    "fujifilmtgbt1-1132",
+    "fujifilmvggfx10ii-0432",
+    "fujifilmvgxh-1006",
+    "fujifilmwcl-x100ii",
+    "fujifilmwclx100ii-1420",
+    "fujifilm-x100v",
+    "fujifilmx100v-1123",
+    "fujifilmx100vi-0249",
+    "fujifilm-xc1333f3563ois-1046",
+    "fujifilmxc1545f3556oispz-0913",
+    "fujifilmxc35f2-1348",
+    "fujifilmxc35f2-2105281036",
+    "fujifilmxc50230f4567oisii-0919",
+    "fujifilmxe3-1126",
+    "fujifilmxe4-1127",
+    "fujifilmxe4-2104141047",
+    "fujifilmxe5-0253",
+    "fujifilmxf100400f4556rlm-1319-ois-wr",
+    "fujifilmxf100400f4556rlmoiswr",
+    "fujifilm-xf1024f40",
+    "fujifilmxf1024f4rois-1151",
+    "fujifilmxf1024f4roiswr-2102180911",
+    "fujifilmxf14f28r-1710",
+    "fujifilmxf14xtcwr-1443",
+    "fujifilmxf150600f568rlmoiswr-1101",
+    "fujifilmxf150600f568rlmoiswr-1418",
+    "fujifilm-xf1650f28-0350",
+    "fujifilm-xf1655f28",
+    "fujifilmxf1655f28rlmwr-1154",
+    "fujifilmxf1655f28rlmwrii-1154",
+    "fujifilm-xf-1680f4roiswr",
+    "fujifilmxf1680f4roiswr-1158",
+    "fujifilm-xf-16f14rwr",
+    "fujifilmxf16f14rwr-1319",
+    "fujifilmxf16f28rwr-1320",
+    "fujifilmxf16f28rwr-2010151047",
+    "fujifilmxf18120f4lmpzwr-1024",
+    "fujifilmxf18135f3556rlmoiswr-1536",
+    "fujifilm-xf1855f2840",
+    "fujifilmxf1855f284rlmois-1314",
+    "fujifilmxf18f14rlmwr-1321",
+    "fujifilmxf18f14rlmwr-2106081026",
+    "fujifilm-xf18f20r",
+    "fujifilmxf18f2r-1323",
+    "fujifilmxf200f2rlmoiswr-1345",
+    "fujifilmxf200f2rlmoiswr-2112161558",
+    "fujifilm-xf23f14r",
+    "fujifilmxf23f14r-1324",
+    "fujifilmxf23f14rlmwr-1325",
+    "fujifilmxf23f14rlmwr-2203101142",
+    "fujifilm-xf23f28rwr-0403",
+    "fujifilm-xf-23f2rwr",
+    "fujifilmxf23f2rwr-1326",
+    "fujifilmxf24xtcwr-1446",
+    "fujifilmxf27f28-0855",
+    "fujifilmxf27f28rwr-1328",
+    "fujifilmxf27f28rwr-2105261059",
+    "fujifilmxf30f28rlmwrmacro-0858",
+    "fujifilmxf33f14rlmwr-1330",
+    "fujifilmxf33mmf14rlmwr2112061327",
+    "fujifilm-xf35f14r",
+    "fujifilmxf35f14r-1332",
+    "fujifilm-xf-35f2rwr",
+    "fujifilmxf35f2rwr-1333",
+    "fujifilm-xf-50140f28",
+    "fujifilmxf50140f28rlmoiswr-1315",
+    "fujifilmxf50f1rwr-1335",
+    "fujifilmxf50f1rwr-2010271143",
+    "fujifilmxf50f2rwr-1336",
+    "fujifilmxf50f2rwr-2108161719",
+    "fujifilm-xf-55200f3548rlmois",
+    "fujifilmxf55200f3548rlmois-1316",
+    "fujifilm-xf56f12r",
+    "fujifilmxf56f12rwr-1435",
+    "fujifilmxf56f12rxf56f12rapd-1339",
+    "fujifilmxf60f24rmacro-1340",
+    "fujifilmxf60f24rmacro-218191425",
+    "fujifilmxf70300f456rlmoiswr-1317",
+    "fujifilmxf70300f456rlmoiswr-2103311001",
+    "fujifilmxf80f28rlmwrmarco",
+    "fujifilmxf80f28rlmwrmarco-1342",
+    "fujifilm-xf-816f28rlmwr",
+    "fujifilmxf816f28rlmwr-1149",
+    "fujifilmxf8f35rwr-1649",
+    "fujifilm-xf-90f2rlmwr",
+    "fujifilmxf90f2rlmwr-1343",
+    "fujifilmxh1-1117",
+    "fujifilmxh1-2008031610",
+    "fujifilmxh2s-1316",
+    "fujifilmxhf1-0415",
+    "fujifilmxpro2",
+    "fujifilmxpro2-1119",
+    "fujifilm-x-pro3",
+    "fujifilmxpro3-1121",
+    "fujifilmxs10-1125",
+    "fujifilmxs10-2102061724",
+    "fujifilmxs20-1333",
+    "fujifilmxt2-1042",
+    "fujifilm-xt30",
+    "fujifilmxt30xt30iixt30iii-1123",
+    "fujifilmxt4-1114",
+    "fujifilmxt50-0303",
+    "fujifilmxt5-1504",
+    "godoxad100pro-0302",
+    "godoxad200-1031",
+    "godoxad200-2202101728",
+    "godoxad200pro-1032",
+    "godoxad200pro-1500",
+    "godoxad300pro-0838",
+    "godoxad300pro-1032",
+    "godoxh200r-1033",
+    "godoxh200r-1422",
+    "godoxim30-1115",
+    "godoxit30pro-1040",
+    "godoxit32-0213",
+    "godoxmf12-1131",
+    "godoxtt350-1058",
+    "godoxtt685ii-1147",
+    "godoxtx3-1109",
+    "godoxv100-0238",
+    "godoxv1-1030",
+    "godoxv1-1442",
+    "godoxv1pro-0500",
+    "godoxv480-0902",
+    "godoxv860ii-1030",
+    "godoxv860ii-2203301643",
+    "godoxv860iii-1031",
+    "godoxv860iii-1456",
+    "godoxx2t-0329",
+    "godoxxproii-0525",
+    "goprohero13-0443",
+    "haogelhs245n-0915",
+    "hasselbladx2d100c-1432",
+    "hasselbladx2dii100c-0455",
+    "hasselbladxcd120f35-0955",
+    "hasselbladxcd135f28-0930",
+    "hasselbladxcd2035f3245e-0248",
+    "hasselbladxcd21f4-1331",
+    "hasselbladxcd21f4-1725",
+    "hasselbladxcd25f25-1010",
+    "hasselbladxcd28f4p-1328",
+    "hasselbladxcd30f35-0939",
+    "hasselbladxcd35100f284e-0926",
+    "hasselbladxcd3575f3545-1345",
+    "hasselbladxcd3575f3545-1724",
+    "hasselbladxcd38f25-1640",
+    "hasselbladxcd45f35-0940",
+    "hasselbladxcd45f4p-1016",
+    "hasselbladxcd55f25-1629",
+    "hasselbladxcd65f28-1328",
+    "hasselbladxcd75f34-0941",
+    "hasselbladxcd80f19-0933",
+    "hasselbladxcd90f25-0526",
+    "hasselbladxcd90f32-1022",
+    "imac24inch-2107261716",
+    "insta360acepro-0233",
+    "insta360acepro2-0237",
+    "insta360go3-0900",
+    "insta360goultra-0236",
+    "insta360gps-0152",
+    "insta360onex2-1132",
+    "insta360onex2-1154",
+    "insta360x3-1041",
+    "insta360x4-0505",
+    "insta360x4air-0837",
+    "insta360x5-0316",
+    "ipad-2112200840",
+    "laowa100f28macro2x-1021",
+    "laowa100f28macro2x-1521",
+    "laowa24f142xmacroprobe-1347",
+    "laowa65f282xultramacroapo-1021",
+    "laowa65f282xultramacroapo-1504",
+    "laowa-75f2mft",
+    "laowa75f2mft-1023",
+    "laowa9f28cddreamer-1020",
+    "laowa9f28cddreamer-canon-2008041013",
+    "laowa-fe1018f4556",
+    "laowa-fe-1018f4556",
+    "laowafe1018f4556-1019",
+    "laowaffii10f28-1020",
+    "laowaffii1224f56cdreamer-0449",
+    "laowaffii12f28-0521",
+    "leica35f14asph-0441",
+    "leica35f14asph-0947",
+    "leica50f14-0429",
+    "leica50f14ii-0856",
+    "leicaaposummicronm35f2asph-1342",
+    "leicaaposummicronsl21f2asph-0418",
+    "leicaaposummicronsl28f2asph-0141",
+    "leicaaposummicronsl35f2asph-1720",
+    "leicaaposummicronsl35f2asph-2105261709",
+    "leicaaposummicronsl75f2asph-0418-1",
+    "leicaapovarioelmaritsl90280f284-1143",
+    "leicacl-0219",
+    "leicadlux7-1113",
+    "leicadlux8-0329",
+    "leicadlux819687-0329",
+    "leicam10-1148",
+    "leicam10-2111291016",
+    "leicam11-1149",
+    "leicam11-2204011431",
+    "leicam1124025-1447",
+    "leicam1124030-1453",
+    "leicam6nonttl-1019",
+    "leicamev1-0150",
+    "leicamp-1410",
+    "leicamp240-0148",
+    "leicanoctiluxm50f095asp-1513",
+    "leicanoctiluxm50f095asph-1722",
+    "leicanoctiluxm50f12asph-1406",
+    "leica-q",
+    "leicaq-1146",
+    "leicaq2-1147",
+    "leicaq219540-1307",
+    "leicaq219543-1308",
+    "leicaq219543-1308-1",
+    "leicaq3-0905",
+    "leicaq319530-1142",
+    "leicaq319533-0850",
+    "leicaq343-0847",
+    "leica-qp",
+    "leicaqp-1147",
+    "leicasl-1144",
+    "leicasl2",
+    "leicasl-2010261438",
+    "leicasl2-1145",
+    "leicasl3-0923",
+    "leicasl50f2apoasph-1721",
+    "leicasl50f2apoasph-2204071350",
+    "leicasl90f2apoasph-1059",
+    "leicasofort2-1018",
+    "leica-summiluxsl50f14asph-1044",
+    "leicavarioelmaritsl2490f284asph-1719",
+    "leicavarioelmaritsl2490f284asph-2009161714",
+    "leicavisoflextyp020-1151",
+    "leicavisoflextyp020-1723",
+    "leicavisoflextyp020-2012230955",
+    "macbook30wusbc-2010081143",
+    "macbook96wusbc-20100840",
+    "mac-mini",
+    "makita18v60-0259",
+    "makita90v25-0515",
+    "makita90v4-0520",
+    "meike55f18-0936",
+    "meike85f18ffstm-0310",
+    "metabones-0339",
+    "nikon-afs-0236-1",
+    "nikon-afs-105f14eed",
+    "nikonafs105f14eed-1129",
+    "nikonafs1424f28ged-1107",
+    "nikonafs1424f28ged-2201071449",
+    "nikonafs1635f4gedvr-1011",
+    "nikonafs200500f56eedvr",
+    "nikonafs200500f56eedvr-1126",
+    "nikonafs200f2gedvrii-1329",
+    "nikonafs24120f4gedvr-1113",
+    "nikonafs24120f4gedvr-2104061723",
+    "nikonafs2470f28eedvr-1112",
+    "nikonafs2470f28ged-1111",
+    "nikonafs2470f28ged-2201241113",
+    "nikonafs300f28gedvrii-1016",
+    "nikonafs300f4difed-1145",
+    "nikonafs300f4difed-2112241141",
+    "nikon-afs35f14-0507",
+    "nikonafs400f28-1026",
+    "nikonafs500f56epfedvr-1323",
+    "nikon-afs50f18g-0200",
+    "nikonafs58f14g-1430",
+    "nikon-afs-70200f28efledvr",
+    "nikonafs70200f28efledvr-1116",
+    "nikonafs-70200f28ged-vrii",
+    "nikonafs70200f28gedvrii-1119",
+    "nikonafs70200f4gedvr-1357",
+    "nikonafs800f56efledvr-1016",
+    "nikonafs80400f4556gedvr-1121",
+    "nikonafs80400f4556gedvr-2104191424",
+    "nikonafs85f14g-1127",
+    "nikonafs85f14g-2104201336",
+    "nikonafs85f18g-1128",
+    "nikonafs85f18g-2104211131",
+    "nikonafsdx1680f284eedvr-1008",
+    "nikonafsdx1680f284eedvr-1108",
+    "nikonafsdx1755f28ged-1109",
+    "nikonafsdx1755f28ged-2104231638",
+    "nikon-afs-nikkor2470f28edvr",
+    "nikonafsteleconvertertc14eiii-1635",
+    "nikonafsvr70200f28gifed-1114",
+    "nikonafsvr70-200f28gifed-1136",
+    "nikonafsvrmicro105f28gifed-1135",
+    "nikonafsvrmicro105f28gifed-2104061718",
+    "nikoncoolpixp1100-0134",
+    "nikond780-0953",
+    "nikond780-1020",
+    "nikond850-1022",
+    "nikond850-2201241118",
+    "nikondf-0432",
+    "nikonftz-1103",
+    "nikonftz-2203301724",
+    "nikonftzii-1104",
+    "nikongr1-0451",
+    "nikonmbd18-1020",
+    "nikonmbd18-1025",
+    "nikonmbn11-1024",
+    "nikonmbn11-2103161004",
+    "nikonmbn12-0443",
+    "nikonspeedlightsb5000-0450",
+    "nikonspeedlightsb900-1031",
+    "nikonspeedlightsb900-2201131204",
+    "nikonz100400f4556vrs-1019",
+    "nikonz100400f4556vrs2202211352",
+    "nikon-z135f18s-0852",
+    "nikonz1424f28s-1006",
+    "nikonz1424f28s-2011091606",
+    "nikon-z1430f4s",
+    "nikonz1430f4s-1008",
+    "nikonz1728mmf28-1632",
+    "nikonz180600f5663vr-1633",
+    "nikonz20f18s-1020",
+    "nikonz20mf18-2008171404",
+    "nikonz24120f4s-1013",
+    "nikonz24120f4s-2201031158",
+    "nikonz24200f463vr-1014",
+    "nikonz24200f463vr-2009031323",
+    "nikonz2450f463-0955",
+    "nikon-z2470f28s",
+    "nikonz2470f28s-1011",
+    "nikonz2470f28sii-0320",
+    "nikon-z2470f4s",
+    "nikonz2470f4s1012",
+    "nikonz24f17-0459",
+    "nikon-z-24f18s",
+    "nikonz24f18s-1021",
+    "nikonz26f28-0844",
+    "nikon-z28135f4pz-0330",
+    "nikon-z28400f48-0922",
+    "nikonz2875f28-0918",
+    "nikonz2875f28-1015",
+    "nikonz28f28se-1022",
+    "nikonz28f28se-2201031157",
+    "nikonz30-1456",
+    "nikon-z35f12s-0304",
+    "nikonz35f14-1147",
+    "nikon-z-35f18s",
+    "nikonz35f18s-1023",
+    "nikonz400f28tcvrs-1521",
+    "nikonz400f45vrs-1606",
+    "nikonz40f2-1024",
+    "nikonz40f2-2112081448",
+    "nikonz40f2se-0411",
+    "nikonz50-1021",
+    "nikonz50-1408",
+    "nikonz50f12-2012301402",
+    "nikonz50f12s-1025",
+    "nikon-z50f18s",
+    "nikonz50f18s-1027",
+    "nikonz50ii-1021",
+    "nikonz5-1016",
+    "nikonz5-2102041330",
+    "nikon-z-58f095snoct",
+    "nikonz58f095snoct-1028",
+    "nikonz5ii-0343",
+    "nikonz600f4tcvrs-1442",
+    "nikonz600f63vrs-1114",
+    "nikon-z6ii-2011191718",
+    "nikon-z6iii-0335",
+    "nikonz6ii-z7ii-1019",
+    "nikon-z6z7",
+    "nikonz6z7-1018",
+    "nikonz70180f28-1405",
+    "nikonz70200f28vrs-1018",
+    "nikonz70200f28vrs-2009071056",
+    "nikonz800f63vrs-1030",
+    "nikonz81303",
+    "nikonz85f12s-1028-1",
+    "nikon-z-85f18s",
+    "nikonz85f18s-1028",
+    "nikonz9-1020",
+    "nikonz9-2202211357",
+    "nikonzdx1228f3563pzvr-0240",
+    "nikon-zdx1650f28vr-1143",
+    "nikonzdx1650f3563vr-1009",
+    "nikonzdx16-50f3563vr-1100",
+    "nikonzdx18140f3563vr-1010",
+    "nikonzdx18140f3563vr-2204081633",
+    "nikonzdx50250f4563vr-1017",
+    "nikonzdx50250f4563vr-1054",
+    "nikonzf-0138",
+    "nikonzfc-1023",
+    "nikonzfc-220281144",
+    "nikon-z-ftzmountadapter",
+    "nikonzmc105f28vrs-1045",
+    "nikonzmc105f28vrs-2107090949",
+    "nikonzmc50f28-1551",
+    "nikon-zr-0253",
+    "nikonzteleconvertertc14x-1032",
+    "nikonzteleconvertertc14x-1105",
+    "nikonzteleconvertertc20x-1037",
+    "nikonzteleconvertertc20x-1106",
+    "nintendoswitch-1029",
+    "nintendoswitch2-0347",
+    "nintendoswitch-2111161141",
+    "nintendoswitch2pro-0412",
+    "nintendoswitcholed-1029",
+    "nintendoswitcholed-2111161141",
+    "nintendoswitchpro-0412",
+    "olympus-12100f4pro",
+    "olympus-1240f28pro",
+    "olympus-17f12pro",
+    "olympus-25f12pro",
+    "olympus-300f4pro",
+    "olympus-40150f28pro",
+    "olympus-45f12pro",
+    "olympus-714f28pro",
+    "olympus-8f18pro",
+    "olympusec202x",
+    "olympusec202x-1457",
+    "olympused100400f563is-1442",
+    "olympused12100f4pro-1436",
+    "olympused12200f3563-0114",
+    "olympused1240f28pro-1434",
+    "olympus-ed1245f4pro",
+    "olympused1245f4pro-1435",
+    "olympused14150f456ii-1456",
+    "olympused14150f456ii-1456-1",
+    "olympused14-35f2swd",
+    "olympused1435f2swd-1440",
+    "olympused17f12pro-1445",
+    "olympused25f12pro-1447",
+    "olympused300f4pro-1451",
+    "olympused30f35macro-1448",
+    "olympused30f35macro-2007271040",
+    "olympused40150f28pro-1441",
+    "olympused45f12pro-1449",
+    "olympused50200f2835swd",
+    "olympused50200f2835swd-1455",
+    "olympused60f28macro-1450",
+    "olympused60f28macro-2007271039",
+    "olympused714f28pro-1426",
+    "olympused825f4pro-1432",
+    "olympused825f4pro-2108021726",
+    "olympused8f18pro-1444",
+    "olympusee1-1059",
+    "olympusem1-markii",
+    "olympusem1markii-1135",
+    "olympus-em1-markiii",
+    "olympusem1markiii-1133",
+    "olympusem1x-1137",
+    "olympusem1x-2112021424",
+    "olympusem5markii-1100",
+    "olympusem5markiii-1115",
+    "olympusmc14mc20-1451",
+    "olympus-mc20",
+    "olympusmmf3",
+    "olympusmmf3-1453",
+    "olympusmzded150400f45pro-2109131545",
+    "olympusmzded150400f45tc125xispro-1443",
+    "olympusmzded45f18-0941",
+    "olympusmzded75f18-1451",
+    "olympusmzuikodigitaled100400f563is-2011041140",
+    "olympuspenf-0943",
+    "omsystem50200-0958",
+    "omsystemed1240f28proii-1448",
+    "omsystemed20f14pro-1458",
+    "omsystemed40150f4pro-1625",
+    "omsystemed90f35ispro-1157",
+    "omsystemhld10-0958",
+    "omsystemmzuikodigital-ed20f14pro-1455",
+    "omsystemom1-1138",
+    "omsystemom1-1138-1",
+    "omsystemom1-2203290953",
+    "omsystemom3-0318",
+    "omsystemom5-1154",
+    "omsystemom5ii-1211",
+    "panasonic100f28-1005",
+    "panasonic1840f4563-0509",
+    "panasonic2xteleconvertor-2012231505",
+    "panasonic2xteleconvertordmwtc20-1710",
+    "panasonic-dg1260f284",
+    "panasonic-dg12mmf14",
+    "panasonic-dg425f12",
+    "panasonicleicadg1260f284asphois-1509",
+    "panasonicleicadg12f14asph-1555",
+    "panasonicleicadg425f12asphois-1558",
+    "panasonicleicadg45f28asph-2105281200",
+    "panasonicleicadg818f284asph-1507",
+    "panasonicleicadgmacroelmarit45f28asphmegaois-1559",
+    "panasonicleicadgsummilux15f17asph-1556",
+    "panasonicleicadgsummilux15f17asph-2008111311",
+    "panasonic-leicadgsummilux25f14",
+    "panasonicleicadgsummilux25f14-1557",
+    "panasonic-leicadgsummilux25f14iiasph-1110",
+    "panasonicleicadgvarioelmar100400f463asphpower",
+    "panasonicleicadgvarioelmar100400f463asphpowerois-1554",
+    "panasonic-leicadgvariosummilux1025f17asph",
+    "panasonicleicadgvariosummilux1025f17asph-1509",
+    "panasonicleicadgvariosummilux2550f17asph-1516",
+    "panasoniclumixdcg9-1451",
+    "panasoniclumixdcs-0433",
+    "panasoniclumixdcs1-1140",
+    "panasoniclumixdcs1rm2-0350",
+    "panasoniclumixdcs5-1141",
+    "panasoniclumixdcs5-2012031725",
+    "panasoniclumixdcs5iix-1010",
+    "panasonic-lumix-dctz99-0146",
+    "panasonic-lumix-dgelmarit200f28powerois",
+    "panasoniclumixdgelmarit200f28powerois-1600",
+    "panasoniclumixg14f25asph-1348",
+    "panasonic-lumixg20f17iiasph-",
+    "panasoniclumixg9ii-0851",
+    "panasoniclumixgh5-1142",
+    "panasoniclumixgh5ii-1143",
+    "panasoniclumixgh6gh7-1021",
+    "panasoniclumixgvario35100f456asphmegaois-1511",
+    "panasoniclumixgvario35100f456asphmegaois-2010071342",
+    "panasoniclumixgxvario1235f28-1032-1",
+    "panasoniclumixgxvario1235f28ii-1032",
+    "panasonic-lumixgx-vario35100f28iipowerois",
+    "panasoniclumixgxvario35100f28iipowerois-1512",
+    "panasoniclumix-gxvario35100f28powerois",
+    "panasoniclumixgxvario35100f28powerois-1512",
+    "panasoniclumixgxvariopz45175f456asphpowerois-1553",
+    "panasoniclumixgxvariopz45175f456asphpowerois-2010071450",
+    "panasoniclumixs18f18-1148",
+    "panasoniclumixs2060f3556-1640",
+    "panasoniclumixs2060f3556-2010280948",
+    "panasoniclumixs24105f4macroois-1653",
+    "panasoniclumixs24105f4macroois-2010281037",
+    "panasonic-lumixs2460f28-0422",
+    "panasoniclumixs24f18-1535",
+    "panasoniclumixs28200f471-0154",
+    "panasoniclumixs35f18-1657",
+    "panasoniclumixs35f18-2203301335",
+    "panasoniclumixs50f18-1531",
+    "panasoniclumixs85f18-1553",
+    "panasoniclumixs85f18-1709",
+    "panasoniclumixspro1635f4-1355",
+    "panasoniclumixspro1635f4-1620",
+    "panasonic-lumix-spro2470f28",
+    "panasoniclumixspro2470f28-1657",
+    "panasonic-lumix-spro50f14",
+    "panasoniclumixspro50f14-1708",
+    "panasonic-lumix-spro70200f28ois",
+    "panasoniclumixspro70200f28ois-1654",
+    "panasoniclumixspro70200f4ois-1655",
+    "panasoniclumixspro70200mmf4ois-2012031455",
+    "peakdesigntraveltripod-1028",
+    "peakdesigntraveltripod-2001081527",
+    "pelican1535air-1159",
+    "pentax-0517",
+    "phoneskin",
+    "polaroidhiprint23-0355",
+    "profotoa10-0223-1",
+    "profotoa1-1002",
+    "profotoa2-0906",
+    "profotob10x-0432",
+    "ricohgf2-0253",
+    "ricohgr2-1154",
+    "ricohgriii-1153",
+    "ricohgriii-2012151155",
+    "ricohgriv-0345",
+    "rodewirelessgo-0421",
+    "rodewirelessgoii-1026",
+    "rodewirelessgoii-2201031357",
+    "rodewirelesspro-0528",
+    "samyang-af12f2x-1003",
+    "samyangaf135f18fe-1016",
+    "samyangaf135f18fe-2204061055",
+    "samyangaf14244f28fe-0456",
+    "samyang-af14f28fe",
+    "samyangaf14f28fe-1007",
+    "samyangaf14f28rf-1018",
+    "samyangaf14f28rf-2105111044",
+    "samyangaf18f28fe-1008",
+    "samyangaf18f28fe-2104070929",
+    "samyangaf2460f28fe-0910",
+    "samyangaf2470f28fe-1006",
+    "samyangaf2470f28fe-1625",
+    "samyangaf24f18fe-1009",
+    "samyangaf24f18fe-2204081539",
+    "samyangaf24f28fe-1010",
+    "samyangaf35150f228fe-1019",
+    "samyangaf35150f228l-0152",
+    "samyang-af35f14fe",
+    "samyangaf35f14fe-1010",
+    "samyangaf35f14feii-0923",
+    "samyangaf35f14feii-1011",
+    "samyang-af35f14pfe-0313",
+    "samyangaf35f18fe-1012",
+    "samyangaf35f28fe-1013",
+    "samyangaf45f18fe-1013",
+    "samyangaf45f18fe-2203041552",
+    "samyangaf50f14fe-1014",
+    "samyangaf50f14feii-1014",
+    "samyangaf50f14feii-2201141128",
+    "samyangaf75f18fe-1015",
+    "samyangaf75f18fe-2203041651",
+    "samyang-af75f18x-0302",
+    "samyang-af-85f14fe",
+    "samyangaf85f14fe-1016",
+    "samyangaf85f14feii-1436",
+    "samyangaf85f14rf-1017",
+    "samyangaf85f14rf-2105101509",
+    "samyangvaf100-0302",
+    "samyangvaf2024354575-1708",
+    "samyang-xp50f12fe-1145",
+    "samyang-xp85f12fe-1144",
+    "sgimageaf25mmf18-0402",
+    "sigma100400f563dgdnoscontemporary-0906",
+    "sigma100400f563dgdnoscontemporary-1355",
+    "sigma100400f563dgdnoscontemporary-20102661144",
+    "sigma100400f563dgoshsmcontemporary-0926",
+    "sigma100400f563dgoshsmcontemporary-2010221053",
+    "sigma100400f563dgoshsmcontemporary-2108301149",
+    "sigma1018f28dcdncontemporary-1",
+    "sigma105f14dghsmart-0916",
+    "sigma105f14dghsmart-canon-2020791331",
+    "sigma105f28dgdnmacroart-0917",
+    "sigma105f28dgdnmacroart-2012090952",
+    "sigma105mmf14dghsmartsony-sonyemount",
+    "sigma1224f4dghsmart-1456",
+    "sigma-135f14dgart-0105",
+    "sigma135f18dghsmart-0918",
+    "sigma135f18dghsmart-2104090958",
+    "sigma-1424f28dgdnart",
+    "sigma1424f28dgdnart-0903",
+    "sigma-1424f28dghsm",
+    "sigma1424f28dghsm-0923",
+    "sigma1424f28dghsm-20111610",
+    "sigma14f14-1137",
+    "sigma14f18dghsmart0927",
+    "sigma14f18dghsmart-2202251538",
+    "sigma150600f563dgdnossports-0907",
+    "sigma150600f563dgdnossports-2109151013",
+    "sigma150600f563dgoshsm-0300",
+    "sigma150600f563dgoshsmsports-0931",
+    "sigma150600f563dgoshsmsports-2203011522",
+    "sigma15f14-1013",
+    "sigma1628f28dgdncontemporary-0903",
+    "sigma1628f28dgdncontemporary-1409",
+    "sigma-16f14dcdncontemporary",
+    "sigma16f14dcdncontemporary-0854",
+    "sigma1835f18dchsm",
+    "sigma1835f18dchsm-0924",
+    "sigma1850f28dcdncontemporary-1627",
+    "sigma20f14dgdnart-0914",
+    "sigma20f14dghsmart-0908",
+    "sigma20f2dgdncontemporary-0907",
+    "sigma20f2dgdncontemporary-2204081424",
+    "sigma23f14dcdn-0135",
+    "sigma-2470f28dgdnart",
+    "sigma2470f28dgdnart-0904",
+    "sigma2470f28dgdniiart-0856",
+    "sigma2470f28dgoshsmart-0929",
+    "sigma2470f28dgoshsmart-2108061358",
+    "sigma24f14dgdnart-1701",
+    "sigma24f14dghsmart-0909",
+    "sigma24f35dgdn-0519",
+    "sigma28105f28art-1109",
+    "sigma2845f18dgdnart-1046",
+    "sigma2870f28dgdncontemporary-0905",
+    "sigma2870f28dgdncontemporary-2105241025",
+    "sigma28mmf14dghsmart-1331",
+    "sigma-30f14dcdncontemporary",
+    "sigma30f14dcdncontemporary-0855",
+    "sigma-35f12dgdnart",
+    "sigma35f12dgdnart-0910",
+    "sigma-35f12dgdnart-1",
+    "sigma35f12dgiiart-0325",
+    "sigma35f14dgdnart-0911",
+    "sigma35f14dgdnart-2106161000",
+    "sigma35f14dghsmart-0911",
+    "sigma35f2dgdncontemporary-0911",
+    "sigma35f2dgdncontemporary-2101071713",
+    "sigma40f14dghsmart-1709",
+    "sigma-45f28dgdn-contemporary",
+    "sigma45f28dgdncontemporary-0912",
+    "sigma45f28dgdncontemporary-0912-1",
+    "sigma-45f28dgdn-contemporary-1",
+    "sigma500f56dgdn-0511",
+    "sigma50100f18dc-1123",
+    "sigma50f14dgdnart-0922",
+    "sigma50f14dghsmart-0913",
+    "sigma50f14dghsmart-2106161558",
+    "sigma50f2dgdn-1029",
+    "sigma-56f14dcdn-contemporary",
+    "sigma56f14dcdncontemporary-0856",
+    "sigma60600f4563dgdnossports-1043",
+    "sigma60600f4563dgoshsmsport",
+    "sigma60600f4563dgoshsmsport-0925",
+    "sigma65f2dgdncontemporary-0913",
+    "sigma65f2dgdncontemporary-2103111346",
+    "sigma70200f28dgdnos-1112",
+    "sigma-70200f28dgoshsm",
+    "sigma70200f28dgoshsmsport-0926",
+    "sigma70f28dgmacroart-0914",
+    "sigma85f14dgdnart",
+    "sigma85f14dgdnart-2009020922",
+    "sigma85f14dghsmart-0915",
+    "sigmaapoteleconverter2xex-1004",
+    "sigmabf-0233",
+    "sigma-f20200f3563dg-0142",
+    "sigma-fe12f1-1028",
+    "sigmafe135f18art",
+    "sigma-fe16300f3567-0314",
+    "sigma-fe1740f18dcart-0458",
+    "sigma-fe17f4-1026",
+    "sigma-fe200f2-0436",
+    "sigma-fe20f14art",
+    "sigma-fe24105f4-0927",
+    "sigma-fe24f14art",
+    "sigma-fe35f14art",
+    "sigma-fe50f12dgdnart-0522",
+    "sigma-fe50f14art",
+    "sigma-fe70f28artmacro",
+    "sigma-fe85f14art",
+    "sigmafe90f28dgdncontemporary-0144",
+    "sigmamc110959",
+    "sigma-mc11mountadapter",
+    "siruisniper23f12-0446",
+    "siruisniper85f14-1340",
+    "sony-057xfisheyeconveter",
+    "sony-075xultrawideconveter",
+    "sonya1-0913",
+    "sonya1-2103151050",
+    "sonya1ii-1128",
+    "sony-a6000",
+    "sonya6000-0935",
+    "sonya6100-0936",
+    "sonya6100-2104221315",
+    "sony-a6300",
+    "sonya6300-0937",
+    "sony-a6400",
+    "sonya6400-0937",
+    "sony-a6500",
+    "sonya6500-0939",
+    "sony-a6600",
+    "sonya6600-0939",
+    "sonya6700-1724",
+    "sonya7-2110061203",
+    "sony-a72a7r2a7s2",
+    "sony-a73a7r3",
+    "sonya74-2111261534",
+    "sonya75-0433",
+    "sonya7a7ra7s-0915",
+    "sonya7c-0928",
+    "sonya7c-2010161647",
+    "sonya7cii-1146",
+    "sonya7iia7riia7sii-0916",
+    "sonya7iiia7riiia7riiia-0918",
+    "sonya7iv-0922",
+    "sony-a7r4",
+    "sonya7r5-1504",
+    "sonya7s3-2010051012",
+    "sonya7siii-0921",
+    "sony-a9",
+    "sonya9-0926",
+    "sonya93-0422",
+    "sony-a9-ii",
+    "sonya9ii-0927",
+    "sonydscrx1r-0107",
+    "sonydscrx1rii-0942",
+    "sonydscrx1rii-2012011200",
+    "sonydscrx1riii-0909",
+    "sony-e1018f4",
+    "sonye1018f4oss-1306",
+    "sonye11f18-0936",
+    "sonye15f14g-1345",
+    "sony-e-16-55f28g",
+    "sonye1655f28g-1308",
+    "sony-e1670f4za",
+    "sonye1670f4zaoss-1309",
+    "sonye16f28-1313",
+    "sonye16f28-1450",
+    "sony-e18105f4g",
+    "sony-e18135f3556",
+    "sonye18135f3556oss-1311",
+    "sonye18200f3563oss-1353",
+    "sonye18200f3563oss-2203091139",
+    "sonye18200f3563ossle-1354",
+    "sony-e24f18za",
+    "sonye24f18za-1356",
+    "sonye30f35macro-1136",
+    "sonye35f18oss-1326",
+    "sonye35f18oss-2108051348",
+    "sonye55210f4563oss-0342",
+    "sony-e-70350f4563goss",
+    "sonye70350f4563goss-1312",
+    "sonyecmb10-1504",
+    "sonyecmb1m-1423",
+    "sonyecmm1-1014",
+    "sonyecmw2bt-1432",
+    "sonyecmw3-0116",
+    "sonyepz1020f4g-1443",
+    "sony-epz-1650f3556oss",
+    "sonyepz1650f3556oss-1307",
+    "sonyepz1650f3556ossii-0447",
+    "sonyepz18105f4goss-1310",
+    "sonyfawrc1m-1002",
+    "sonyfawrc1m-2108161114",
+    "sonyfdaev1mk-0111",
+    "sony-fe100400f4556gm",
+    "sonyfe100400f4556gm-1407",
+    "sonyfe100f28gmoss-0211",
+    "sonyfe100f28stfgmoss-1529",
+    "sony-fe100gmstf",
+    "sonyfe1224f28gm-1338",
+    "sonyfe1224f28gm-2008051018",
+    "sony-fe1224f4g",
+    "sonyfe1224f4g-1337",
+    "sony-fe135f18gm",
+    "sonyfe135f18gm-1531",
+    "sonyfe14f18gm-1409",
+    "sonyfe14f18gm-2105201330",
+    "sony-fe-14x-tc20",
+    "sonyfe14xtc20tc-1535",
+    "sony-fe1635f28gm",
+    "sonyfe1635f28gm-1339",
+    "sonyfe1635f28gmii-1417",
+    "sony-fe1635f4za",
+    "sonyfe1635f4zaoss-1409",
+    "sony-fe16f18g-113",
+    "sony-fe200600f5663gm",
+    "sonyfe200600f5663goss-1408",
+    "sonyfe2070f4g-0912",
+    "sony-fe20f18g",
+    "sonyfe20f18g-1410",
+    "sony-fe24105f4g",
+    "sonyfe24105f4goss-1347",
+    "sony-fe24240f3563",
+    "sonyfe24240f3563oss-1349",
+    "sonyfe24501625f28g-0332",
+    "sony-fe2470f28gm",
+    "sonyfe2470f28gm-1343",
+    "sonyfe2470f28gmii-1344",
+    "sonyfe2470f28gmii-1438",
+    "sony-fe2470f4za",
+    "sonyfe2470f4zaoss-1346",
+    "sony-fe24f14gm",
+    "sonyfe24f14gm-1411",
+    "sonyfe24f28g-1413",
+    "sonyfe24f28g-21-8181708",
+    "sonyfe2860f456-1352",
+    "sonyfe2860f456-2201030931",
+    "sonyfe2870f2-1320",
+    "sony-fe2870f3556",
+    "sonyfe2870f3556oss-1353",
+    "sony-fe28f2",
+    "sonyfe28f2-1416",
+    "sonyfe300f28goss-0316",
+    "sonyfe35f14gm-1418",
+    "sonyfe35f14gm-2102041344",
+    "sony-fe35f14za",
+    "sonyfe35f14za-1419",
+    "sony-fe35f18",
+    "sonyfe35f18-1421",
+    "sony-fe-35f28za",
+    "sonyfe35f28za-1422",
+    "sonyfe400800f638goss-0359",
+    "sony-fe400f28gm",
+    "sonyfe400f28gmoss-0308",
+    "sonyfe400f28gmoss-1532",
+    "sonyfe4050f25g-2104271139",
+    "sony-fe50150f2gm-0153",
+    "sonyfe50f12gm-1425",
+    "sonyfe50f12gm-2104151425",
+    "sonyfe50f14gm-1111",
+    "sony-fe50f14za",
+    "sonyfe50f14za-1426",
+    "sony-fe50f18",
+    "sonyfe50f18-1448",
+    "sonyfe50f25g40f25g-1424",
+    "sony-fe50f28macro",
+    "sonyfe50f28macro-1431",
+    "sony-fe55f18za",
+    "sonyfe55f18za-1451",
+    "sony-fe600f4gm",
+    "sonyfe600f4gmoss-0254",
+    "sonyfe600f4gmoss-1533",
+    "sony-fe-70200f28gmoss",
+    "sonyfe70200f28gmoss-1359",
+    "sonyfe70200f28gmossii-1400",
+    "sonyfe70200f28gmossii-21411101612",
+    "sony-fe70200f4g",
+    "sonyfe70200f4goss-1402",
+    "sonyfe70200f4macrogossii-1547",
+    "sony-fe70300f4556g",
+    "sonyfe70300f4556goss-1406",
+    "sonyfe85f14gm",
+    "sony-fe85f14gm",
+    "sonyfe85f14gmii-0108",
+    "sony-fe85f18",
+    "sonyfe85f18-1523",
+    "sony-fe90f28gmacro",
+    "sonyfe90f28gmacrooss-1524",
+    "sonyfepz1635f4g-0959",
+    "sonyfepz1635f4g-1342",
+    "sonyfepz28135f4goss-1357",
+    "sonyfepz28135f4goss-2008261648",
+    "sonyfisheyeconverter057x-1542",
+    "sonyfisheyeconvertervclecf2-1050",
+    "sonyfx2-1154",
+    "sonyfx30-1102",
+    "sonyfx3-0929",
+    "sonyfx3-2105061159",
+    "sonyfx3xlrhandle-0930",
+    "sonyfx3xlrhandle-2105061318",
+    "sonygpvpt2bt-1000",
+    "sonygpvpt2bt-2011121013",
+    "sonygpx2-1056",
+    "sonyhvlf28rm",
+    "sonyhvlf28rm-0953",
+    "sonyhvlf60rm",
+    "sonyhvlf60rm-0951",
+    "sonyhvlf60rm2-0952",
+    "sonyhvlf60rm2-2112141222",
+    "sonylaea5-1548",
+    "sonylaea5-2012220931",
+    "sonyrmtp1bt-0959",
+    "sonyrmtp1bt-2008181637",
+    "sony-rx100iii",
+    "sonyrx100iii-0944",
+    "sonyrx100iv-1651",
+    "sony-rx100m5",
+    "sonyrx100vi-0945",
+    "sonyrx100vii-0946",
+    "sonyrx100vim6-2008311557",
+    "sonyrx100vva-0945",
+    "sony-rx10iv",
+    "sonyrx10iv-0941",
+    "sonyultrawideconvertersel075uwc-1546",
+    "sonyultrawideconvertervclecu2-1454",
+    "sonyultrawideconvertervclecu2-1547",
+    "sony-vgc3em",
+    "sonyvgc3em-0933",
+    "sony-vg-c4em",
+    "sonyvgc4em-0934",
+    "sonyvgc5-0429",
+    "sonywh1000xm5-1026",
+    "sonywh1000xm6-0307",
+    "sonyzv1-0948",
+    "sonyzv1f-1137",
+    "sonyzv1ii-0629",
+    "sonyzve10-0949",
+    "sonyzve10-2108301535",
+    "sonyzve10ii-0444",
+    "sonyzve1-1600",
+    "squarehood-0840",
+    "squarehood23-0304",
+    "squarehood27-011",
+    "squarehoodmodelv-1010",
+    "tamron1120f28diiiiarxd-1001",
+    "tamron1120f28diiiiarxd-21121333",
+    "tamron150500f567-2110251546",
+    "tamron150500f567diiiivcvxd-0958",
+    "tamron1630f28g2-0253",
+    "tamron-1728f28a046",
+    "tamron1728f28dilllrxd-0951",
+    "tamron1750f4diiiivxd-0906-1",
+    "tamron1770f28diiiiavcrxd-1001",
+    "tamron1770f28sonyapsc-2105181055",
+    "tamron18300f3563diiiiavcvxd-0952",
+    "tamron18300f3563diiiiavcvxdb061-1005",
+    "tamron18300f3563diiiiavcvxdb061-2112231652",
+    "tamron18400f3563b028-0431",
+    "tamron20-24-0959",
+    "tamron2040f28diiiivxd-1056",
+    "tamron-20f28diiiiosdm12f050",
+    "tamron25200f2856diiiivxdg2a075-0348",
+    "tamron28200f2856diiiirxd-0955",
+    "tamron-28200f2856diiiirxd-a071",
+    "tamron28300f471-0406",
+    "tamron-2875f28a036",
+    "tamron2875f28diiiirxd-0953",
+    "tamron2875f28diiiivxdg2-0954-1",
+    "tamron2875f28diiiivxdg2-211121451",
+    "tamron35150f228diiiivxd-0956",
+    "tamron35150f228diiiivxda058-211141343",
+    "tamron35f28diiiiosdm12f053-1000",
+    "tamron35f28diiiosdm12f053-2008101143",
+    "tamron50300f4563-0144",
+    "tamron50400f4563diiiivcvxd-1617",
+    "tamron70180f28diiiivxd-0954",
+    "tamron-70180f28diiiivxda",
+    "tamron70180f28diiiivxdg2-1602",
+    "tamron70210f4divcusd-1447",
+    "tamron70300f4563diiiirxd-0958",
+    "tamron70300f4563diiiirxda047sonyemount-2012010845",
+    "tamron90f28-0359",
+    "tamronsp150600f563divcusd-1004",
+    "tamron-sp-150600f563divcusd-a011",
+    "tamronsp150600f563divcusdg2-1004",
+    "tamronsp150600f563divcusdg2-2112291411",
+    "tamronsp2470f28divcusdg2-1712",
+    "tamronsp70200f28divcusdg2-1003",
+    "tamron-sp70200f28divcusdg2a025-2010131129",
+    "tamronsp70200f28divcusdg2a025-canon",
+    "tokina-fe100f28macro",
+    "tokinafírin100f28femacro-1023",
+    "ttartisanaf56f18-1056",
+    "ttartisanaf75f2-0925",
+    "valvesteamdeck-1606-1",
+    "viltrox85f18stm-0901",
+    "viltroxaf135f18fe-0524",
+    "viltroxaf13f14xf-1025",
+    "viltroxaf13f14xf-1459",
+    "viltroxaf16f18fe-0245",
+    "viltroxaf16f18z-1017",
+    "viltroxaf20f28stmasphedif-0115",
+    "viltroxaf2333f14stmedif-0955",
+    "viltroxaf27f12pro-0847",
+    "viltroxaf27f12proz-1023",
+    "viltroxaf27f12xf-0519",
+    "viltroxaf35f12lab-0459",
+    "viltroxaf35f17-0502",
+    "viltroxaf35f18z-0858",
+    "viltroxaf40f25e-0900",
+    "viltroxaf50f2air-0525",
+    "viltroxaf56f12-0317",
+    "viltroxaf56f14stmedif-1006",
+    "viltroxaf56f17xf-1400",
+    "viltroxaf75f12proxf-1200",
+    "viltroxaf75f12z-1027",
+    "viltroxaf85f14pro-0200",
+    "viltroxaf85f18iistm-1511",
+    "viltroxaf85f18stm-0402",
+    "viltroxaf85f20evofe-0220",
+    "viltroxaf9f28-0912",
+    "viltroxefm2071x",
+    "viltroxefm2ii071x-1025",
+    "viltroxtc20x",
+    "vivozeiss235xtelephotoboosterlens-0923",
+    "xbox-0444",
+    "xiaomiwalkiealkie2s-0430",
+    "yongnuoyn85f18sdfdsm-1024",
+    "yongnuoyn85f18sdfdsm-2103240906",
+    "zeissbatis135f280837",
+    "zeissbatis18f28-0834",
+    "zeissbatis25f2-0835",
+    "zeissbatis40f2cf-0835",
+    "zeissbatis85f18-0836",
+    "zeissloxia21f28-0827",
+    "zeissloxia25f24-0838",
+    "zeissloxia35f2-0839",
+    "zeissloxia50f2-0840",
+    "zeissloxia85f24-0840",
+    "zeissmilvus100f2-0847",
+    "zeissmilvus100f2ze-2102181051",
+    "zeissmilvus15f28-0846",
+    "zeissmilvus15f282112231016",
+    "zeissmilvus35f14ze-1443",
+    "zeissmilvus50f2-0847",
+    "zeissmilvus50f2-2112221632",
+    "zeissotus100f14ze-0844",
+    "zeissotus100f14ze-2203041548",
+    "zeissotus28f14zf2-0842",
+    "zeissotus28f14zf2-2203041538",
+    "zeissotus-55f14",
+    "zeissotus55f14-ze-1010",
+    "zeissotus55f14zf2-0842",
+    "zeissotus85f14zezf2-0843",
+    "zeissotus85f14zf2-2203041542",
+    "zeissotusml50f14-0451",
+    "zeisstouit-12-f28",
+    "zeisstouit12f28-0848",
+    "zeisstouit-32-f18",
+    "zeisstouit32f18-0849",
+    "zeisszx1-1152",
+    "zeisszx1-1342",
+    "zhongyispeedmaster65f14-1731",
+    "ziessbatis-135f28",
+    "ziessbatis-18f28",
+    "ziessbatis-25mmf2",
+    "ziessbatis-40f2",
+    "ziessbatis-85f18",
+    "ziess-loxia21",
+    "ziessloxia-25",
+    "ziessloxia-35",
+    "ziessloxia-50",
+    "ziessloxia-85"
+]
+;
+
+    // Brand detection and display name mapping
+    const brandPatterns = [
+        { pattern: /^sony|^sonya|^sonye|^sonyfe|^sonyfx|^sonyzv|^sonyrx|^sonyhvl|^sonygp|^sonyecm|^sonyepz|^sonyfaw|^sonyfda|^sonyrm|^sonylaea|^sonyvg|^sonywh|^sonyultrawideconverter|^sonyfisheyeconverter/i, brand: 'Sony', color: '#f97316' },
+        { pattern: /^canon/i, brand: 'Canon', color: '#ef4444' },
+        { pattern: /^nikon/i, brand: 'Nikon', color: '#eab308' },
+        { pattern: /^fujifilm|^fijifilm/i, brand: 'Fujifilm', color: '#22c55e' },
+        { pattern: /^sigma/i, brand: 'Sigma', color: '#06b6d4' },
+        { pattern: /^panasonic/i, brand: 'Panasonic', color: '#3b82f6' },
+        { pattern: /^olympus|^omsystem/i, brand: 'Olympus/OM', color: '#0ea5e9' },
+        { pattern: /^tamron/i, brand: 'Tamron', color: '#a855f7' },
+        { pattern: /^samyang/i, brand: 'Samyang', color: '#ec4899' },
+        { pattern: /^leica/i, brand: 'Leica', color: '#f43f5e' },
+        { pattern: /^zeiss|^ziess/i, brand: 'Zeiss', color: '#14b8a6' },
+        { pattern: /^hasselblad/i, brand: 'Hasselblad', color: '#f59e0b' },
+        { pattern: /^godox/i, brand: 'Godox', color: '#8b5cf6' },
+        { pattern: /^viltrox/i, brand: 'Viltrox', color: '#10b981' },
+        { pattern: /^dji/i, brand: 'DJI', color: '#6366f1' },
+        { pattern: /^insta360/i, brand: 'Insta360', color: '#f97316' },
+        { pattern: /^laowa/i, brand: 'Laowa', color: '#84cc16' },
+        { pattern: /^rode/i, brand: 'RODE', color: '#ef4444' },
+        { pattern: /^apple|^airpods|^ipad|^imac|^macbook|^mac-mini|^applepencil|^applemagic/i, brand: 'Apple', color: '#a3a3a3' },
+        { pattern: /^nintendo/i, brand: 'Nintendo', color: '#ef4444' },
+        { pattern: /^gopro/i, brand: 'GoPro', color: '#3b82f6' },
+        { pattern: /^meike/i, brand: 'Meike', color: '#9ca3af' },
+        { pattern: /^tokina/i, brand: 'Tokina', color: '#f472b6' },
+        { pattern: /^ttartisan/i, brand: 'TTArtisan', color: '#fbbf24' },
+        { pattern: /^profoto/i, brand: 'Profoto', color: '#e5e7eb' },
+        { pattern: /^ricoh/i, brand: 'RICOH', color: '#fbbf24' },
+        { pattern: /^fringer/i, brand: 'Fringer', color: '#9ca3af' },
+        { pattern: /^squarehood/i, brand: 'Squarehood', color: '#9ca3af' },
+        { pattern: /^vivo/i, brand: 'Vivo', color: '#3b82f6' },
+        { pattern: /^xbox/i, brand: 'Xbox', color: '#22c55e' },
+        { pattern: /^valve/i, brand: 'Steam Deck', color: '#6366f1' },
+        { pattern: /^cardo/i, brand: 'Cardo', color: '#9ca3af' },
+        { pattern: /^makita/i, brand: 'Makita', color: '#22d3ee' },
+        { pattern: /^xiaomi/i, brand: 'Xiaomi', color: '#f97316' },
+        { pattern: /^pelican/i, brand: 'Pelican', color: '#9ca3af' },
+        { pattern: /^metabones/i, brand: 'Metabones', color: '#9ca3af' },
+        { pattern: /^haoge/i, brand: 'Haoge', color: '#9ca3af' },
+        { pattern: /^sirui/i, brand: 'SIRUI', color: '#f59e0b' },
+        { pattern: /^sgimage/i, brand: 'SG Image', color: '#9ca3af' },
+        { pattern: /^7artisans/i, brand: '7Artisans', color: '#9ca3af' },
+        { pattern: /^yongnuo/i, brand: 'Yongnuo', color: '#9ca3af' },
+        { pattern: /^peakdesign/i, brand: 'Peak Design', color: '#e5e7eb' },
+        { pattern: /^pentax/i, brand: 'PENTAX', color: '#9ca3af' },
+        { pattern: /^phoneskin/i, brand: 'Phone', color: '#9ca3af' },
+        { pattern: /^polaroid/i, brand: 'Polaroid', color: '#f97316' },
+        { pattern: /^zhongyi/i, brand: 'Zhongyi', color: '#9ca3af' },
+        { pattern: /^a7riv/i, brand: 'Sony', color: '#f97316' },
+    ];
+
+    function detectBrand(slug) {
+        for (const bp of brandPatterns) {
+            if (bp.pattern.test(slug)) return { brand: bp.brand, color: bp.color };
+        }
+        return { brand: 'Other', color: '#6b7280' };
+    }
+
+    function formatName(slug) {
+        // Remove trailing number codes like -0845, -2008181006
+        let name = slug.replace(/-\d{4,}$/g, '').replace(/-\d{3,4}$/g, '');
+        // Add spaces before brand transitions
+        name = name
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .replace(/-/g, ' ')
+            .replace(/f(\d)/gi, 'f/$1')
+            .replace(/(\d)(mm)/gi, '$1$2');
+        return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+
+    function detectType(slug) {
+        if (/lens|f\d|mm|ois|wr|stm|usm|vr|gm|art|contemporary|sport|macro|fisheye|tse|teleconverter|extender|tc\d|hood/i.test(slug)) return 'Lens / Optics';
+        if (/eos|a7|a9|a6|zv|fx|rx|gfx|xt\d|xpro|xh|xe|xm|xs|em\d|om\d|z\d|d\d|r\d|r\d0|gr|q\d|sl\d|m\d|cl|dlux|penf|gh\d|g9|s1|s5|d780|d850|zf|zfc|z50|z30|90d|5d|6d|r10/i.test(slug)) return 'Camera / Body';
+        if (/flash|speedl|hvl|el\d|v\d|ad\d|tt\d|godox|profoto/i.test(slug)) return 'Flash / Light';
+        if (/grip|bg|vg|mbd|mbn|hld/i.test(slug)) return 'Battery Grip';
+        if (/mount|adapter|ftz|laea|efm|cfr|mc\d|metabones|fringer/i.test(slug)) return 'Adapter';
+        if (/tripod|peak|remote|gpvpt|rmtp/i.test(slug)) return 'Tripod / Remote';
+        if (/mic|ecm|rode|wireless/i.test(slug)) return 'Audio / Mic';
+        if (/airpods|wh1000|headphone/i.test(slug)) return 'Headphone';
+        if (/ipad|imac|macbook|mac|apple|pencil|magic/i.test(slug)) return 'Apple Product';
+        if (/switch|xbox|steam|valve/i.test(slug)) return 'Game Console';
+        if (/insta360|gopro|dji|action|pocket|avata|goggle|nano/i.test(slug)) return 'Action Cam / Drone';
+        if (/squarehood|haoge|hood/i.test(slug)) return 'Lens Hood';
+        if (/pelican/i.test(slug)) return 'Carry Case';
+        return 'Skin / Accessory';
+    }
+
+    // Process slugs into manual objects
+    function buildManuals(slugs) {
+        return slugs.map(slug => {
+            const cleanSlug = slug.replace('https://www.lifeguard-design.com/pages/onlinemanual', '').replace(/^-/, '');
+            const { brand, color } = detectBrand(cleanSlug);
+            return {
+                slug: cleanSlug,
+                url: BASE_URL + cleanSlug,
+                brand,
+                color,
+                name: formatName(cleanSlug),
+                type: detectType(cleanSlug),
+                searchText: (cleanSlug + ' ' + brand + ' ' + formatName(cleanSlug) + ' ' + detectType(cleanSlug)).toLowerCase()
+            };
+        });
+    }
+
+    // Start with embedded data
+    let manuals = buildManuals(manualSlugs);
+    const fallbackCount = manualSlugs.length;
+
+    // Current state
+    let currentFilter = 'All';
+    let currentSearch = '';
+
+    // === AUTO-UPDATE FROM SITEMAP ===
+    const SITEMAP_URL = 'https://www.lifeguard-design.com/sitemap.xml';
+    const CACHE_KEY = 'lifeguard_manual_slugs';
+    const CACHE_TIME_KEY = 'lifeguard_manual_cache_time';
+
+    function updateStatusUI(status, message) {
+        const badge = document.getElementById('statusBadge');
+        const text = document.getElementById('statusText');
+        const btn = document.getElementById('refreshBtn');
+        const icon = document.getElementById('refreshIcon');
+
+        badge.className = 'status-badge ' + status;
+        text.textContent = message;
+
+        if (status === 'loading') {
+            btn.disabled = true;
+            icon.innerHTML = '<span class="spin">🔄</span>';
+        } else {
+            btn.disabled = false;
+            icon.textContent = '🔄';
+        }
+    }
+
+    function extractSlugsFromSitemap(xmlText) {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlText, 'text/xml');
+        const urls = xml.querySelectorAll('url > loc');
+        const slugs = [];
+
+        urls.forEach(loc => {
+            const url = loc.textContent;
+            const match = url.match(/\/pages\/onlinemanual-(.+)$/);
+            if (match) {
+                slugs.push(match[1]);
+            }
+        });
+
+        return [...new Set(slugs)]; // deduplicate
+    }
+
+    function mergeSlugs(existingSlugs, newSlugs) {
+        const existingSet = new Set(existingSlugs);
+        const merged = [...existingSlugs];
+        const added = [];
+
+        newSlugs.forEach(slug => {
+            // Normalize: remove full URL prefix if present
+            const clean = slug.replace('https://www.lifeguard-design.com/pages/onlinemanual-', '');
+            if (!existingSet.has(clean)) {
+                merged.push(clean);
+                added.push(clean);
+                existingSet.add(clean);
+            }
+        });
+
+        return { merged, added };
+    }
+
+    async function fetchSitemapData() {
+        updateStatusUI('loading', 'กำลังดึงข้อมูลจากเว็บไซต์...');
+
+        try {
+            // Try direct fetch first
+            let xmlText;
+            try {
+                const response = await fetch(SITEMAP_URL, { 
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                if (response.ok) {
+                    xmlText = await response.text();
+                }
+            } catch (e) {
+                // Direct fetch failed (CORS), try proxy
+                console.log('Direct fetch failed, trying CORS proxy...');
+            }
+
+            // If direct failed, try CORS proxies
+            if (!xmlText) {
+                const proxies = [
+                    'https://api.allorigins.win/raw?url=',
+                    'https://corsproxy.io/?',
+                    'https://api.codetabs.com/v1/proxy?quest='
+                ];
+
+                for (const proxy of proxies) {
+                    try {
+                        const response = await fetch(proxy + encodeURIComponent(SITEMAP_URL), {
+                            cache: 'no-cache'
+                        });
+                        if (response.ok) {
+                            xmlText = await response.text();
+                            if (xmlText.includes('<urlset')) break;
+                            xmlText = null;
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
+
+            if (!xmlText || !xmlText.includes('<urlset')) {
+                throw new Error('ไม่สามารถดึงข้อมูลได้');
+            }
+
+            // Parse sitemap
+            const sitemapSlugs = extractSlugsFromSitemap(xmlText);
+
+            if (sitemapSlugs.length === 0) {
+                throw new Error('ไม่พบข้อมูลคู่มือใน sitemap');
+            }
+
+            // Merge with existing
+            const { merged, added } = mergeSlugs(manualSlugs, sitemapSlugs);
+
+            // Save to cache
+            localStorage.setItem(CACHE_KEY, JSON.stringify(merged));
+            localStorage.setItem(CACHE_TIME_KEY, new Date().toISOString());
+
+            // Rebuild manuals
+            manuals = buildManuals(merged);
+
+            // Update UI
+            document.getElementById('totalCount').textContent = manuals.length.toLocaleString();
+            rebuildAll();
+
+            const newCount = added.length;
+            if (newCount > 0) {
+                updateStatusUI('live', `✅ อัพเดทแล้ว! พบใหม่ ${newCount} รายการ (รวม ${manuals.length} คู่มือ)`);
+                showNewItemsBadge(added);
+            } else {
+                updateStatusUI('live', `✅ ข้อมูลล่าสุด — ${manuals.length} คู่มือ`);
+            }
+
+        } catch (error) {
+            console.error('Sitemap fetch error:', error);
+
+            // Try to load from cache
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const cachedSlugs = JSON.parse(cached);
+                    const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
+                    manuals = buildManuals(cachedSlugs);
+                    document.getElementById('totalCount').textContent = manuals.length.toLocaleString();
+                    rebuildAll();
+
+                    // Find new items in cache compared to hardcoded list
+                    const hardcodedSet = new Set(manualSlugs);
+                    const cachedNewItems = cachedSlugs.filter(s => !hardcodedSet.has(s));
+                    
+                    const timeStr = cacheTime ? new Date(cacheTime).toLocaleString('th-TH') : 'ไม่ทราบ';
+                    updateStatusUI('offline', `📦 ใช้ข้อมูลแคช (${manuals.length} คู่มือ) อัพเดทล่าสุด: ${timeStr}`);
+                    
+                    if (cachedNewItems.length > 0) {
+                        showNewItemsBadge(cachedNewItems);
+                    }
+                } catch (e) {
+                    updateStatusUI('error', `⚠️ ใช้ข้อมูลเดิม ${fallbackCount} คู่มือ — ไม่สามารถเชื่อมต่อเว็บได้`);
+                }
+            } else {
+                updateStatusUI('error', `⚠️ ใช้ข้อมูลเดิม ${fallbackCount} คู่มือ — ไม่สามารถเชื่อมต่อเว็บได้`);
+            }
+        }
+    }
+
+    // === NEW ITEMS DISPLAY ===
+    function showNewItemsBadge(addedSlugs) {
+        // Remove existing badge
+        const existingBadge = document.getElementById('newItemsBadge');
+        if (existingBadge) existingBadge.remove();
+
+        const badge = document.createElement('span');
+        badge.id = 'newItemsBadge';
+        badge.className = 'new-items-badge';
+        badge.innerHTML = `✨ ดูรายการใหม่ ${addedSlugs.length} รายการ`;
+        badge.onclick = () => showNewItemsModal(addedSlugs);
+
+        document.getElementById('updateStatus').appendChild(badge);
+    }
+
+    function showNewItemsModal(addedSlugs) {
+        // Remove existing modal
+        const existing = document.getElementById('newItemsModal');
+        if (existing) existing.remove();
+
+        // Build new items data
+        const newItems = addedSlugs.map(slug => {
+            const { brand, color } = detectBrand(slug);
+            return {
+                slug,
+                brand,
+                color,
+                name: formatName(slug),
+                type: detectType(slug),
+                url: BASE_URL + slug
+            };
+        });
+
+        let itemsHtml = '';
+        newItems.forEach((item, i) => {
+            itemsHtml += `
+                <a href="${item.url}" target="_blank" rel="noopener" class="new-item-entry">
+                    <span class="new-item-num">${i + 1}</span>
+                    <div class="new-item-info">
+                        <div class="new-item-brand" style="color: ${item.color}">${item.brand}</div>
+                        <div class="new-item-name">${item.name}</div>
+                        <div class="new-item-type">${item.type}</div>
+                    </div>
+                    <span class="new-item-link">→</span>
+                </a>`;
+        });
+
+        const overlay = document.createElement('div');
+        overlay.id = 'newItemsModal';
+        overlay.className = 'new-items-modal-overlay';
+        overlay.innerHTML = `
+            <div class="new-items-modal">
+                <div class="new-items-modal-header">
+                    <h3>🆕 รายการที่อัพเดทใหม่ <span class="count-badge">${newItems.length}</span></h3>
+                    <button class="new-items-modal-close" onclick="closeNewItemsModal()">✕ ปิด</button>
+                </div>
+                <div class="new-items-modal-body">
+                    ${itemsHtml}
+                </div>
+            </div>`;
+
+        // Close on overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeNewItemsModal();
+        });
+
+        document.body.appendChild(overlay);
+    }
+
+    function closeNewItemsModal() {
+        const modal = document.getElementById('newItemsModal');
+        if (modal) {
+            modal.style.animation = 'fadeIn 0.2s ease reverse';
+            setTimeout(() => modal.remove(), 200);
+        }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('newItemsModal');
+            if (modal) {
+                closeNewItemsModal();
+                e.stopPropagation();
+            }
+        }
+    });
+
+    // === RENDERING ===
+
+    function rebuildAll() {
+        renderFilters();
+        renderResults();
+    }
+
+    function renderFilters() {
+        const brandCounts = {};
+        manuals.forEach(m => { brandCounts[m.brand] = (brandCounts[m.brand] || 0) + 1; });
+        const brands = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]);
+
+        const container = document.getElementById('filters');
+        let html = `<button class="filter-btn ${currentFilter === 'All' ? 'active' : ''}" onclick="setFilter('All')">All (${manuals.length})</button>`;
+        brands.forEach(([brand, count]) => {
+            if (count >= 3) {
+                html += `<button class="filter-btn ${currentFilter === brand ? 'active' : ''}" onclick="setFilter('${brand}')">${brand} (${count})</button>`;
+            }
+        });
+        container.innerHTML = html;
+    }
+
+    function setFilter(brand) {
+        currentFilter = brand;
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.startsWith(brand) || (brand === 'All' && btn.textContent.startsWith('All')));
+        });
+        renderResults();
+    }
+
+    function renderResults() {
+        const container = document.getElementById('results');
+        const statsEl = document.getElementById('stats');
+        const search = currentSearch.toLowerCase().trim();
+        const searchTerms = search.split(/\s+/).filter(t => t.length > 0);
+
+        let filtered = manuals;
+
+        if (currentFilter !== 'All') {
+            filtered = filtered.filter(m => m.brand === currentFilter);
+        }
+
+        if (searchTerms.length > 0) {
+            filtered = filtered.filter(m => searchTerms.every(term => m.searchText.includes(term)));
+        }
+
+        statsEl.innerHTML = `แสดง <span>${filtered.length}</span> จาก <span>${manuals.length}</span> คู่มือ`;
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>ไม่พบคู่มือที่ตรงกัน ลองเปลี่ยนคำค้นหาดูครับ</p>
+                </div>`;
+            return;
+        }
+
+        // Limit to 200 for performance, with a note
+        const display = filtered.slice(0, 200);
+        let html = '';
+        display.forEach((m, i) => {
+            html += `
+                <a href="${m.url}" target="_blank" rel="noopener" class="result-card" style="animation-delay: ${Math.min(i * 20, 300)}ms">
+                    <div class="card-brand" style="color: ${m.color}">${m.brand}</div>
+                    <div class="card-name">${highlightMatch(m.name, searchTerms)}</div>
+                    <div class="card-type">
+                        <span class="dot"></span>
+                        ${m.type}
+                    </div>
+                    <span class="open-icon">→</span>
+                </a>`;
+        });
+
+        if (filtered.length > 200) {
+            html += `<div class="empty-state"><p>แสดง 200 จาก ${filtered.length} รายการ — กรุณาพิมพ์เพิ่มเพื่อกรองผลลัพธ์</p></div>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+    function highlightMatch(text, terms) {
+        if (terms.length === 0) return text;
+        let result = text;
+        terms.forEach(term => {
+            const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            result = result.replace(regex, '<mark style="background:rgba(59,130,246,0.3);color:#93c5fd;border-radius:2px;padding:0 2px">$1</mark>');
+        });
+        return result;
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        currentSearch = '';
+        document.getElementById('clearBtn').style.display = 'none';
+        renderResults();
+        document.getElementById('searchInput').focus();
+    }
+
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        currentSearch = e.target.value;
+        document.getElementById('clearBtn').style.display = currentSearch ? 'block' : 'none';
+        renderResults();
+    });
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') clearSearch();
+        if (e.key === '/' && document.activeElement !== document.getElementById('searchInput')) {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+    });
+
+    // === INIT ===
+    renderFilters();
+    renderResults();
+
+    // Auto-fetch on page load
+    fetchSitemapData();
+    </script>
+</body>
+</html>
+
